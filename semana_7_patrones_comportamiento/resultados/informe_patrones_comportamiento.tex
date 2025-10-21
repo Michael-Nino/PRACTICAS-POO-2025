@@ -1,0 +1,478 @@
+\documentclass[11pt,a4paper]{article}
+
+% Paquetes esenciales
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-lcroman,es-tabla]{babel}
+\usepackage{mathptmx} % Times New Roman
+\usepackage{graphicx,enumitem}
+\usepackage{ae}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Margenes: derecho, superior e inferior 2.5 cm e izquierdo 3.5 cm
+\usepackage[left=3.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+
+% Configuracion de la institucion
+\newcommand{\Institution}{Universidad Nacional del Altiplano\xspace}
+\newcommand{\InstAcro}{UNAP\xspace}
+\gdef\@Facultad{}
+\newcommand{\Facultad}[1]{\gdef\@Facultad{#1}}
+\gdef\@Escuela{}
+\newcommand{\Escuela}[1]{\gdef\@Escuela{#1}}
+\gdef\@TProfesional{}
+\newcommand{\TProfesional}[1]{\gdef\@TProfesional{#1}}
+
+% Disenando Caratula
+\renewcommand{\maketitle}
+{
+    \thispagestyle{empty}
+    \begin{center}
+        {\fontsize{18pt}{1em} \textbf{\MakeUppercase{\Institution}}}\\
+        \vspace*{0.34cm}
+        {\fontsize{16pt}{1em} \textbf{\MakeUppercase{Facultad de Ingenieria Mecanica Electrica, Electronica y Sistemas}}}\\
+        \vspace*{0.34cm}
+        {\fontsize{14pt}{1em} \textbf{\MakeUppercase{Escuela Profesional de Ingenieria de Sistemas}}}\\
+    \end{center}        
+    \vspace*{1.2cm}
+    
+    \begin{figure}[h]
+    \center
+    \includegraphics[width=4.33cm,height=4.68cm]{logo_unap.png}
+    \end{figure}
+
+    \begin{center}
+        \vspace*{1.05cm}
+        {\fontsize{14pt}{1em} \textbf {INFORME DE PRACTICAS:} \par}
+        \vspace*{0.6cm}
+        \begin{spacing}{1.5}
+        {\fontsize{14pt}{1em} \textbf {PATRONES DE DISENO DE COMPORTAMIENTO} \par}
+        {\fontsize{14pt}{1em} \textbf {SEMANA 7} \par}
+        \end{spacing}
+        \vspace*{1.05cm}
+        {\fontsize{14pt}{1em} \textbf {PRESENTADO POR:}\par}
+        \vspace*{0.45cm}
+        {\fontsize{14pt}{1em} \textbf {APAZA SORTIJA MICHAEL ANTHONY} \par}
+        {\fontsize{14pt}{1em} \textbf {CAHUANA QUISPE DAYANA MARGARITA} \par}
+        {\fontsize{14pt}{1em} \textbf {MAMANI CHURA ERIKA IVONNE} \par}
+        \vspace*{0.6cm}
+        {\fontsize{14pt}{1em} \textbf{DOCENTE:} \par}
+        \vspace*{0.6cm}
+        {\fontsize{16pt}{1em} \textbf{\MakeUppercase{Ing. Zanabria Galvez Aldo Hernan}} \par}
+        \vspace*{1.05cm}
+        {\fontsize{14pt}{1em} \textbf{PUNO - PERU}}\\
+        \vspace*{0.45cm}
+        {\fontsize{14pt}{1em} \textbf{2025}}
+    \end{center}
+    
+    \pagebreak
+}
+
+% Configuracion de encabezados
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{UNAP - Ingenieria de Sistemas}
+\fancyhead[R]{Patrones de Comportamiento}
+\fancyfoot[C]{\thepage}
+
+% Configuracion de listings para codigo
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    tabsize=4,
+    captionpos=b
+}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduccion}
+
+Los patrones de comportamiento se centran en los algoritmos y la asignacion de responsabilidades entre objetos. Estos patrones no solo describen patrones de objetos o clases, sino tambien los patrones de comunicacion entre ellos.
+
+En esta semana se estudiaron tres patrones fundamentales de comportamiento:
+
+\begin{itemize}
+    \item \textbf{Observer}: Define una dependencia uno-a-muchos entre objetos, de manera que cuando un objeto cambia su estado, todos sus dependientes son notificados automaticamente.
+    \item \textbf{Strategy}: Define una familia de algoritmos, encapsula cada uno de ellos y los hace intercambiables.
+    \item \textbf{Command}: Encapsula una peticion como un objeto, permitiendo parametrizar clientes con diferentes peticiones, encolar peticiones y soportar operaciones reversibles.
+\end{itemize}
+
+\section{Marco Teorico}
+
+\subsection{Patron Observer}
+
+El patron Observer establece una relacion de dependencia uno-a-muchos entre objetos, de forma que cuando el objeto observado (Subject) cambia de estado, notifica este cambio a todos los objetos que dependen de el (Observers).
+
+\textbf{Componentes principales:}
+\begin{itemize}
+    \item \textbf{Subject}: Mantiene una lista de observadores y proporciona metodos para agregar y eliminar observadores.
+    \item \textbf{Observer}: Define una interfaz de actualizacion para los objetos que deben ser notificados ante cambios en el Subject.
+    \item \textbf{ConcreteSubject}: Almacena el estado de interes para los ConcreteObservers y envia notificaciones cuando cambia su estado.
+    \item \textbf{ConcreteObserver}: Implementa la interfaz Observer para mantener su estado consistente con el del Subject.
+\end{itemize}
+
+\subsection{Patron Strategy}
+
+El patron Strategy define una familia de algoritmos, los encapsula y los hace intercambiables. Strategy permite que el algoritmo varie independientemente de los clientes que lo usan.
+
+\textbf{Componentes principales:}
+\begin{itemize}
+    \item \textbf{Strategy}: Interfaz comun para todos los algoritmos soportados.
+    \item \textbf{ConcreteStrategy}: Implementa el algoritmo usando la interfaz Strategy.
+    \item \textbf{Context}: Mantiene una referencia a un objeto Strategy y puede definir una interfaz que permita a Strategy acceder a sus datos.
+\end{itemize}
+
+\subsection{Patron Command}
+
+El patron Command encapsula una peticion como un objeto, lo que permite parametrizar clientes con diferentes peticiones, encolar o registrar peticiones, y soportar operaciones que se pueden deshacer.
+
+\textbf{Componentes principales:}
+\begin{itemize}
+    \item \textbf{Command}: Declara una interfaz para ejecutar operaciones.
+    \item \textbf{ConcreteCommand}: Implementa la interfaz Command e invoca las operaciones correspondientes sobre el Receiver.
+    \item \textbf{Invoker}: Solicita al comando que ejecute la peticion.
+    \item \textbf{Receiver}: Conoce como realizar las operaciones necesarias para llevar a cabo la peticion.
+\end{itemize}
+
+\section{Desarrollo de Ejercicios}
+
+\subsection{Ejercicio 1: Sistema de Chat (Observer)}
+
+Se implemento un sistema de chat donde multiples usuarios pueden recibir mensajes cuando alguien escribe en una sala de chat.
+
+\subsubsection{Implementacion en C++}
+
+\textbf{Caracteristicas principales:}
+\begin{itemize}
+    \item Clase \texttt{SalaChat} como Subject que mantiene lista de observadores
+    \item Clase \texttt{Usuario} como Observer que recibe notificaciones
+    \item Metodos \texttt{agregar()}, \texttt{eliminar()} y \texttt{notificar()}
+    \item Envio de mensajes a todos los usuarios conectados
+\end{itemize}
+
+\textbf{Salida esperada:}
+\begin{verbatim}
+[Alice] recibio: Hola a todos!
+[Bob] recibio: Hola a todos!
+[Charlie] recibio: Hola a todos!
+\end{verbatim}
+
+\subsubsection{Implementacion en Python}
+
+La version en Python utiliza ABC para definir la interfaz Observer, proporcionando una implementacion mas flexible con listas dinamicas de observadores.
+
+\subsection{Ejercicio 2: Algoritmos de Ordenamiento (Strategy)}
+
+Se implemento un sistema que permite cambiar dinamicamente el algoritmo de ordenamiento utilizado (Burbuja, Seleccion, Insercion).
+
+\subsubsection{Implementacion en C++}
+
+\textbf{Caracteristicas principales:}
+\begin{itemize}
+    \item Interfaz abstracta \texttt{EstrategiaOrdenamiento}
+    \item Tres estrategias concretas: Burbuja, Seleccion, Insercion
+    \item Clase \texttt{Ordenador} que permite cambiar estrategia en tiempo de ejecucion
+    \item Medicion de tiempo de ejecucion para cada algoritmo
+\end{itemize}
+
+\textbf{Resultados observados:}
+\begin{itemize}
+    \item Ordenamiento Burbuja: Adecuado para arreglos pequenos
+    \item Ordenamiento Seleccion: Rendimiento moderado
+    \item Ordenamiento Insercion: Eficiente para datos casi ordenados
+\end{itemize}
+
+\subsubsection{Implementacion en Python}
+
+La version Python aprovecha las caracteristicas del lenguaje para implementaciones mas concisas de los algoritmos, manteniendo la misma arquitectura de patron Strategy.
+
+\subsection{Ejercicio 3: Editor de Texto (Command)}
+
+Se implemento un editor de texto con operaciones reversibles (undo) usando el patron Command.
+
+\subsubsection{Implementacion en C++}
+
+\textbf{Caracteristicas principales:}
+\begin{itemize}
+    \item Clase abstracta \texttt{Comando} con metodos \texttt{ejecutar()} y \texttt{deshacer()}
+    \item Comandos concretos: \texttt{ComandoEscribir} y \texttt{ComandoBorrar}
+    \item Clase \texttt{Editor} como Receiver que mantiene el contenido
+    \item Clase \texttt{GestorComandos} como Invoker que mantiene historial
+\end{itemize}
+
+\textbf{Operaciones soportadas:}
+\begin{itemize}
+    \item Escribir texto
+    \item Borrar texto
+    \item Deshacer ultima operacion (undo)
+    \item Mantener historial de comandos
+\end{itemize}
+
+\subsubsection{Implementacion en Python}
+
+La implementacion en Python utiliza la flexibilidad del lenguaje para manejar el estado del editor y el historial de comandos de manera mas dinamica.
+
+\section{Analisis Comparativo: C++ vs Python}
+
+\begin{table}[H]
+\centering
+\caption{Comparacion de implementaciones C++ y Python}
+\begin{tabular}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Aspecto} & \textbf{C++} & \textbf{Python} \\
+\hline
+Definicion de interfaces & Clases abstractas con metodos virtuales puros & Modulo ABC con @abstractmethod \\
+\hline
+Gestion de memoria & Manual con punteros (raw o smart pointers) & Automatica con garbage collector \\
+\hline
+Polimorfismo & Mediante herencia y funciones virtuales & Duck typing o herencia de ABC \\
+\hline
+Verbosidad & Mayor verbosidad, mas codigo boilerplate & Mas conciso, menos codigo \\
+\hline
+Rendimiento & Alto rendimiento, compilado & Menor rendimiento, interpretado \\
+\hline
+Seguridad de tipos & Fuertemente tipado en tiempo de compilacion & Tipado dinamico en tiempo de ejecucion \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Patron Observer}
+
+\textbf{En C++:}
+\begin{itemize}
+    \item Requiere definicion explicita de clases abstractas
+    \item Gestion manual de la lista de observadores
+    \item Mayor control sobre la memoria y el ciclo de vida
+\end{itemize}
+
+\textbf{En Python:}
+\begin{itemize}
+    \item Uso de ABC para definir interfaces
+    \item Listas dinamicas facilitan agregar/eliminar observadores
+    \item Codigo mas limpio y legible
+\end{itemize}
+
+\subsection{Patron Strategy}
+
+\textbf{En C++:}
+\begin{itemize}
+    \item Uso de punteros para cambiar estrategias
+    \item Templates pueden proporcionar flexibilidad adicional
+    \item Mejor rendimiento para operaciones intensivas
+\end{itemize}
+
+\textbf{En Python:}
+\begin{itemize}
+    \item Estrategias pueden ser funciones o clases
+    \item Duck typing permite mayor flexibilidad
+    \item Cambio de estrategia mas simple y directo
+\end{itemize}
+
+\subsection{Patron Command}
+
+\textbf{En C++:}
+\begin{itemize}
+    \item Control preciso sobre ejecucion y deshacer
+    \item Historial de comandos con vectores o pilas
+    \item Mayor complejidad en la implementacion
+\end{itemize}
+
+\textbf{En Python:}
+\begin{itemize}
+    \item Implementacion mas simple del historial
+    \item Uso de listas para almacenar comandos
+    \item Serializacion mas facil para guardar estado
+\end{itemize}
+
+\section{Aplicaciones en Frameworks Reales}
+
+\subsection{Patron Observer}
+
+\textbf{Android (LiveData y ViewModel):}
+\begin{itemize}
+    \item LiveData implementa el patron Observer para actualizar la UI
+    \item Los componentes de UI observan cambios en los datos
+    \item Gestion automatica del ciclo de vida de los observadores
+\end{itemize}
+
+\textbf{RxJava/RxJS:}
+\begin{itemize}
+    \item Programacion reactiva basada en Observables
+    \item Operadores para transformar y combinar streams de datos
+    \item Usado extensivamente en aplicaciones web y moviles
+\end{itemize}
+
+\textbf{Vue.js:}
+\begin{itemize}
+    \item Sistema de reactividad basado en Observer
+    \item Data binding bidireccional
+    \item Actualizacion automatica del DOM
+\end{itemize}
+
+\subsection{Patron Strategy}
+
+\textbf{Spring Framework:}
+\begin{itemize}
+    \item Estrategias de transacciones (@Transactional)
+    \item Diferentes implementaciones de repositorios
+    \item Estrategias de autenticacion en Spring Security
+\end{itemize}
+
+\textbf{Passport.js (Node.js):}
+\begin{itemize}
+    \item Diferentes estrategias de autenticacion
+    \item Local, OAuth, JWT, etc.
+    \item Facil intercambio entre estrategias
+\end{itemize}
+
+\textbf{Algoritmos de ordenamiento en STL C++:}
+\begin{itemize}
+    \item std::sort permite diferentes comparadores
+    \item Estrategias de ordenamiento personalizadas
+    \item Functores y lambdas como estrategias
+\end{itemize}
+
+\subsection{Patron Command}
+
+\textbf{Redux (JavaScript):}
+\begin{itemize}
+    \item Actions son comandos que modifican el estado
+    \item Dispatch ejecuta los comandos
+    \item Time-travel debugging (undo/redo)
+\end{itemize}
+
+\textbf{GUI Frameworks (Qt, Swing):}
+\begin{itemize}
+    \item Sistema de acciones (QAction, Action)
+    \item Menu items y toolbar buttons como comandos
+    \item Undo/Redo stacks implementados
+\end{itemize}
+
+\textbf{Git:}
+\begin{itemize}
+    \item Cada comando (commit, push, pull) es un Command
+    \item Historial de comandos ejecutados
+    \item Operaciones reversibles (git revert)
+\end{itemize}
+
+\section{Ventajas y Desventajas}
+
+\subsection{Patron Observer}
+
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Desacopla el Subject de los Observers
+    \item Soporte para broadcast de comunicacion
+    \item Facilita agregar nuevos observadores sin modificar el Subject
+\end{itemize}
+
+\textbf{Desventajas:}
+\begin{itemize}
+    \item Orden de notificacion no garantizado
+    \item Posibles problemas de rendimiento con muchos observadores
+    \item Dificultad para debugging de la cadena de actualizaciones
+\end{itemize}
+
+\subsection{Patron Strategy}
+
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Familia de algoritmos intercambiables
+    \item Elimina condicionales complejos
+    \item Facilita testing de algoritmos individuales
+\end{itemize}
+
+\textbf{Desventajas:}
+\begin{itemize}
+    \item Cliente debe conocer las diferentes estrategias
+    \item Incremento en el numero de clases
+    \item Posible overhead de comunicacion entre Context y Strategy
+\end{itemize}
+
+\subsection{Patron Command}
+
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Desacopla el objeto que invoca la operacion del que la ejecuta
+    \item Permite operaciones undo/redo
+    \item Facilita encolar, registrar y ejecutar comandos
+\end{itemize}
+
+\textbf{Desventajas:}
+\begin{itemize}
+    \item Incremento en el numero de clases
+    \item Mayor complejidad en sistemas simples
+    \item Mantenimiento del historial puede consumir memoria
+\end{itemize}
+
+\section{Resultados y Conclusiones}
+
+\subsection{Resultados de las Implementaciones}
+
+Los tres patrones fueron implementados exitosamente en ambos lenguajes (C++ y Python):
+
+\begin{enumerate}
+    \item \textbf{Observer}: Sistema de chat funcional con multiples usuarios recibiendo notificaciones en tiempo real.
+    
+    \item \textbf{Strategy}: Sistema de ordenamiento que permite cambiar algoritmos dinamicamente, verificando diferentes comportamientos y rendimientos.
+    
+    \item \textbf{Command}: Editor de texto con capacidad de deshacer operaciones, manteniendo historial de comandos ejecutados.
+\end{enumerate}
+
+\subsection{Conclusiones}
+
+\begin{enumerate}
+    \item Los patrones de comportamiento son fundamentales para crear sistemas flexibles y mantenibles que requieren comunicacion compleja entre objetos.
+    
+    \item El patron \textbf{Observer} es esencial en sistemas basados en eventos y arquitecturas reactivas, permitiendo actualizaciones automaticas cuando cambia el estado.
+    
+    \item El patron \textbf{Strategy} proporciona una excelente solucion para sistemas que requieren intercambiar algoritmos en tiempo de ejecucion, mejorando la flexibilidad.
+    
+    \item El patron \textbf{Command} es invaluable en sistemas que requieren operaciones reversibles, registro de acciones o ejecucion diferida de operaciones.
+    
+    \item La implementacion en C++ ofrece mejor rendimiento y control, mientras que Python proporciona codigo mas conciso y facil de mantener.
+    
+    \item Ambos lenguajes permiten implementar efectivamente estos patrones, la eleccion depende de los requisitos especificos del proyecto.
+    
+    \item La comprension de estos patrones es fundamental para el desarrollo de software moderno, especialmente en frameworks y bibliotecas populares.
+\end{enumerate}
+
+\section{Referencias}
+
+\begin{enumerate}
+    \item Gamma, E., Helm, R., Johnson, R., \& Vlissides, J. (1994). \textit{Design Patterns: Elements of Reusable Object-Oriented Software}. Addison-Wesley.
+    
+    \item Freeman, E., \& Freeman, E. (2004). \textit{Head First Design Patterns}. O'Reilly Media.
+    
+    \item Documentacion oficial de C++: \url{https://cppreference.com}
+    
+    \item Documentacion oficial de Python: \url{https://docs.python.org}
+    
+    \item Refactoring Guru - Design Patterns: \url{https://refactoring.guru/design-patterns}
+    
+    \item Android Developers - LiveData: \url{https://developer.android.com/topic/libraries/architecture/livedata}
+    
+    \item Spring Framework Documentation: \url{https://spring.io/projects/spring-framework}
+    
+    \item Redux Documentation: \url{https://redux.js.org}
+\end{enumerate}
+
+\end{document}
