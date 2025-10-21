@@ -1,0 +1,224 @@
+@startuml decorator_uml
+
+title Patron Decorator - Diagrama de Clases Detallado
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor<<Component>> LightBlue
+    BackgroundColor<<ConcreteComponent>> LightYellow
+    BackgroundColor<<Decorator>> LightGreen
+    BackgroundColor<<ConcreteDecorator>> LightCyan
+    BackgroundColor<<Client>> Pink
+}
+
+abstract class Componente <<Component>> {
+    {abstract} + ejecutar() : string
+    {abstract} + obtenerDescripcion() : string
+    # validado : bool
+    # timestamp : DateTime
+}
+
+class FuncionBase <<ConcreteComponent>> {
+    - nombre : string
+    - operacion : function<double(double)>
+    - parametros : vector<double>
+    --
+    + FuncionBase(nombre: string, op: function)
+    + ejecutar() : string
+    + obtenerDescripcion() : string
+    + establecerParametros(params: vector<double>) : void
+    - calcularResultado(entrada: double) : double
+}
+
+abstract class Decorador <<Decorator>> {
+    # componente : Componente*
+    --
+    + Decorador(comp: Componente*)
+    + ejecutar() : string
+    + obtenerDescripcion() : string
+    # delegarEjecucion() : string
+}
+
+class ValidadorPositivo <<ConcreteDecorator>> {
+    - valorMinimo : double
+    - mensajeError : string
+    - permitirCero : bool
+    --
+    + ValidadorPositivo(comp: Componente*)
+    + ejecutar() : string
+    + obtenerDescripcion() : string
+    + setValorMinimo(min: double) : void
+    - validarEntrada(valor: double) : bool
+    - generarMensajeError(valor: double) : string
+}
+
+class ValidadorRango <<ConcreteDecorator>> {
+    - minimo : double
+    - maximo : double
+    - inclusivo : bool
+    --
+    + ValidadorRango(comp: Componente*, min: double, max: double)
+    + ejecutar() : string
+    + obtenerDescripcion() : string
+    + setRango(min: double, max: double) : void
+    - estaEnRango(valor: double) : bool
+}
+
+class Logger <<ConcreteDecorator>> {
+    - archivoLog : string
+    - nivelLog : LogLevel
+    - formato : string
+    --
+    + Logger(comp: Componente*, archivo: string)
+    + ejecutar() : string
+    + obtenerDescripcion() : string
+    - registrarEjecucion(resultado: string) : void
+    - registrarError(error: string) : void
+    - obtenerTimestamp() : string
+}
+
+class Cronometro <<ConcreteDecorator>> {
+    - tiempoInicio : DateTime
+    - tiempoFin : DateTime
+    - duracion : double
+    --
+    + Cronometro(comp: Componente*)
+    + ejecutar() : string
+    + obtenerDescripcion() : string
+    + getDuracion() : double
+    - iniciarConteo() : void
+    - detenerConteo() : void
+    - formatearTiempo(ms: double) : string
+}
+
+class CacheResultados <<ConcreteDecorator>> {
+    - cache : map<string, string>
+    - maxTamano : int
+    - ttl : int
+    --
+    + CacheResultados(comp: Componente*, maxSize: int)
+    + ejecutar() : string
+    + obtenerDescripcion() : string
+    + limpiarCache() : void
+    - calcularHash(entrada: string) : string
+    - estaEnCache(hash: string) : bool
+    - agregarACache(hash: string, resultado: string) : void
+}
+
+class Cliente <<Client>> {
+    - funciones : vector<Componente*>
+    --
+    + Cliente()
+    + agregarFuncion(func: Componente*) : void
+    + ejecutarTodas() : void
+    + decorarFuncion(func: Componente*, decorador: string) : Componente*
+}
+
+Componente <|-- FuncionBase
+Componente <|-- Decorador
+Decorador <|-- ValidadorPositivo
+Decorador <|-- ValidadorRango
+Decorador <|-- Logger
+Decorador <|-- Cronometro
+Decorador <|-- CacheResultados
+
+Decorador o--> Componente : decora
+Cliente o--> Componente : usa
+
+note right of Decorador
+  Decorador base que:
+  - Mantiene referencia al componente
+  - Delega llamadas al componente
+  - Puede anadir comportamiento antes/despues
+  
+  Todos los decoradores heredan
+  esta estructura basica
+end note
+
+note left of FuncionBase
+  Componente concreto que:
+  - Implementa funcionalidad base
+  - Puede ser decorado
+  - No conoce sus decoradores
+  
+  Ejemplo: raiz_cuadrada, logaritmo, etc.
+end note
+
+note bottom of ValidadorPositivo
+  Anade validacion para
+  numeros positivos:
+  - Verifica valor > 0
+  - Retorna error si negativo
+  - Permite configurar minimo
+end note
+
+note bottom of Logger
+  Registra ejecuciones:
+  - Guarda en archivo
+  - Incluye timestamp
+  - Niveles: INFO, WARNING, ERROR
+end note
+
+note bottom of Cronometro
+  Mide tiempo de ejecucion:
+  - Inicia antes de ejecutar
+  - Detiene despues
+  - Retorna duracion en ms
+end note
+
+note top of CacheResultados
+  Almacena resultados:
+  - Evita recalculos
+  - Configurable (tamaño, TTL)
+  - Usa hash de entrada como clave
+end note
+
+package "Ejemplo de Composicion" <<Cloud>> {
+  note as N1
+    Decoradores pueden combinarse:
+    
+    Componente* f1 = new FuncionBase("sqrt", sqrt);
+    
+    Componente* f2 = new ValidadorPositivo(f1);
+    
+    Componente* f3 = new Logger(f2, "log.txt");
+    
+    Componente* f4 = new Cronometro(f3);
+    
+    Componente* f5 = new CacheResultados(f4, 100);
+    
+    string resultado = f5->ejecutar();
+    
+    Flujo de ejecucion:
+    Cache -> Cronometro -> Logger -> 
+    Validador -> FuncionBase
+    
+    Cada capa anade su funcionalidad
+    sin modificar las capas inferiores
+  end note
+}
+
+legend right
+  Ventajas del patron Decorator:
+  
+  1. Mas flexible que herencia estatica
+  2. Responsabilidades añadidas dinamicamente
+  3. Cumple Single Responsibility Principle
+  4. Cumple Open/Closed Principle
+  5. Combinaciones infinitas posibles
+  
+  Aplicaciones reales:
+  - Java I/O: BufferedInputStream, DataInputStream
+  - Flask: @app.route, @login_required
+  - Spring: @Transactional, @Cacheable
+  - C++ streams: iostream decorators
+  
+  Casos de uso:
+  - Logging y auditoría
+  - Validacion de entrada
+  - Caching de resultados
+  - Medicion de rendimiento
+  - Cifrado/compresion
+endlegend
+
+@enduml

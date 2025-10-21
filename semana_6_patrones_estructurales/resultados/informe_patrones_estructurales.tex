@@ -1,0 +1,618 @@
+\documentclass[11pt,a4paper]{article}
+
+% Paquetes esenciales
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-lcroman,es-tabla]{babel}
+\usepackage{mathptmx} % Times New Roman
+\usepackage{graphicx,enumitem}
+\usepackage{ae}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Margenes: derecho, superior e inferior 2.5 cm e izquierdo 3.5 cm
+\usepackage[left=3.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+
+% Configuracion de la institucion
+\newcommand{\Institution}{Universidad Nacional del Altiplano\xspace}
+\newcommand{\InstAcro}{UNAP\xspace}
+\gdef\@Facultad{}
+\newcommand{\Facultad}[1]{\gdef\@Facultad{#1}}
+\gdef\@Escuela{}
+\newcommand{\Escuela}[1]{\gdef\@Escuela{#1}}
+\gdef\@TProfesional{}
+\newcommand{\TProfesional}[1]{\gdef\@TProfesional{#1}}
+
+% Disenando Caratula
+\renewcommand{\maketitle}
+{
+    \thispagestyle{empty}
+    \begin{center}
+        {\fontsize{18pt}{1em} \textbf{\MakeUppercase{\Institution}}}\\
+        \vspace*{0.34cm}
+        {\fontsize{16pt}{1em} \textbf{\MakeUppercase{Facultad de Ingenieria Mecanica Electrica, Electronica y Sistemas}}}\\
+        \vspace*{0.34cm}
+        {\fontsize{14pt}{1em} \textbf{\MakeUppercase{Escuela Profesional de Ingenieria de Sistemas}}}\\
+    \end{center}        
+    \vspace*{1.2cm}
+    
+    \begin{figure}[h]
+    \center
+    \includegraphics[width=4.33cm,height=4.68cm]{logo_unap.png}
+    \end{figure}
+
+    \begin{center}
+        \vspace*{1.05cm}
+        {\fontsize{14pt}{1em} \textbf {INFORME DE PRACTICAS:} \par}
+        \vspace*{0.6cm}
+        \begin{spacing}{1.5}
+        {\fontsize{14pt}{1em} \textbf {PATRONES DE DISENO ESTRUCTURALES} \par}
+        {\fontsize{14pt}{1em} \textbf {SEMANA 6} \par}
+        \end{spacing}
+        \vspace*{1.05cm}
+        {\fontsize{14pt}{1em} \textbf {PRESENTADO POR:}\par}
+        \vspace*{0.45cm}
+        {\fontsize{14pt}{1em} \textbf {APAZA SORTIJA MICHAEL ANTHONY} \par}
+        {\fontsize{14pt}{1em} \textbf {CAHUANA QUISPE DAYANA MARGARITA} \par}
+        {\fontsize{14pt}{1em} \textbf {MAMANI CHURA ERIKA IVONNE} \par}
+        \vspace*{0.6cm}
+        {\fontsize{14pt}{1em} \textbf{DOCENTE:} \par}
+        \vspace*{0.6cm}
+        {\fontsize{16pt}{1em} \textbf{\MakeUppercase{Ing. Zanabria Galvez Aldo Hernan}} \par}
+        \vspace*{1.05cm}
+        {\fontsize{14pt}{1em} \textbf{PUNO - PERU}}\\
+        \vspace*{0.45cm}
+        {\fontsize{14pt}{1em} \textbf{2025}}
+    \end{center}
+    
+    \pagebreak
+}
+
+% Configuracion de encabezados
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\thepage}
+\lhead{Patrones Estructurales}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Interlineado
+\onehalfspacing
+
+% Configuracion de codigo
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{gray!10},
+    commentstyle=\color{green!50!black},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{gray},
+    stringstyle=\color{red!70!black},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=single
+}
+
+\lstset{style=mystyle}
+
+% Configuracion de secciones
+\titleformat{\section}
+{\normalfont\Large\bfseries}{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries}{\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+{\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+\begin{document}
+
+\maketitle
+
+
+\section*{RESUMEN}
+\addcontentsline{toc}{section}{RESUMEN}
+
+El presente informe documenta la implementacion y analisis de tres patrones de diseno estructurales fundamentales: Adapter, Decorator y Composite. Se desarrollaron ejercicios practicos que demuestran la aplicabilidad de cada patron en escenarios reales de desarrollo de software. El patron Adapter se implemento mediante un sistema de conversion de pagos entre diferentes monedas, el Decorator a traves de un sistema de validacion de funciones matematicas, y el Composite mediante una estructura jerarquica de archivos y carpetas. Adicionalmente, se analizan las aplicaciones de estos patrones en frameworks modernos como Qt, Java Swing, Flask y React, evidenciando su relevancia en el desarrollo de software contemporaneo.
+
+\section{INTRODUCCION}
+
+Los patrones de diseno estructurales constituyen soluciones probadas para organizar clases y objetos en estructuras mas amplias y flexibles. Segun Gamma et al. (1994), estos patrones facilitan el diseno al identificar formas simples de establecer relaciones entre entidades. Los tres patrones analizados (Adapter, Decorator y Composite) representan aproximaciones distintas para resolver problemas de composicion y estructura de objetos, cada uno con caracteristicas y casos de uso especificos.
+
+\section{OBJETIVOS}
+
+\subsection{Objetivo General}
+
+Implementar y analizar los patrones de diseno estructurales Adapter, Decorator y Composite mediante ejercicios practicos, demostrando su aplicabilidad en escenarios reales de desarrollo de software.
+
+\subsection{Objetivos Especificos}
+
+\begin{itemize}
+    \item Desarrollar implementaciones funcionales de los tres patrones estructurales en C++
+    \item Analizar los resultados de ejecucion de cada implementacion
+    \item Identificar aplicaciones reales de estos patrones en frameworks modernos
+    \item Documentar las ventajas y casos de uso de cada patron
+\end{itemize}
+
+\section{FUNDAMENTO TEORICO}
+
+\subsection{Patron Adapter}
+
+El patron Adapter permite que interfaces incompatibles trabajen juntas. Freeman y Freeman (2004) definen este patron como un convertidor que traduce la interfaz de una clase a otra interfaz que los clientes esperan. Este patron es especialmente util cuando se necesita integrar codigo heredado con nuevos sistemas o cuando se trabaja con bibliotecas de terceros.
+
+\textbf{Estructura:}
+\begin{itemize}
+    \item \textbf{Target:} Define la interfaz que utiliza el cliente
+    \item \textbf{Adapter:} Adapta la interfaz del Adaptee al Target
+    \item \textbf{Adaptee:} Clase existente que necesita ser adaptada
+    \item \textbf{Client:} Colabora con objetos que cumplen la interfaz Target
+\end{itemize}
+
+\subsection{Patron Decorator}
+
+El patron Decorator permite anadir responsabilidades adicionales a un objeto dinamicamente. Segun Martin (2002), los decoradores proporcionan una alternativa flexible a la herencia para extender funcionalidad. Este patron es fundamental cuando se requiere anadir comportamientos sin modificar el codigo existente.
+
+\textbf{Caracteristicas principales:}
+\begin{itemize}
+    \item Extiende funcionalidad de objetos sin modificar su codigo
+    \item Permite combinaciones dinamicas de comportamientos
+    \item Mantiene el principio Open/Closed
+    \item Los decoradores tienen la misma interfaz que los objetos decorados
+\end{itemize}
+
+\subsection{Patron Composite}
+
+El patron Composite permite componer objetos en estructuras de arbol para representar jerarquias parte-todo. Bloch (2008) senala que este patron permite a los clientes tratar objetos individuales y composiciones de manera uniforme. Es especialmente util en interfaces graficas, sistemas de archivos y estructuras organizacionales.
+
+\textbf{Componentes:}
+\begin{itemize}
+    \item \textbf{Component:} Interfaz para objetos en la composicion
+    \item \textbf{Leaf:} Objetos hoja sin hijos
+    \item \textbf{Composite:} Componente con hijos, implementa operaciones relacionadas
+    \item \textbf{Client:} Manipula objetos a traves de la interfaz Component
+\end{itemize}
+
+\section{DESARROLLO DE EJERCICIOS}
+
+\subsection{Ejercicio 1: Patron Adapter - Sistema de Pagos}
+
+\subsubsection{Descripcion del Problema}
+
+Se requiere desarrollar un sistema que integre una pasarela de pagos internacional (opera en dolares) con una aplicacion local que maneja transacciones en soles. El desafio consiste en crear un adaptador que permita realizar pagos en soles utilizando la pasarela que solo acepta dolares.
+
+\subsubsection{Implementacion en C++}
+
+\begin{lstlisting}[language=C++, caption=Sistema de Adaptador de Pagos]
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class PasarelaDolares {
+public:
+    string pagarUSD(double monto) {
+        return "Pago: $" + to_string(monto) + " USD";
+    }
+};
+
+class AdaptadorSoles {
+private:
+    PasarelaDolares* pasarela;
+    double tipoCambio = 3.75;
+    
+public:
+    AdaptadorSoles(PasarelaDolares* p) : pasarela(p) {}
+    
+    string pagarSoles(double monto) {
+        double montoUSD = monto / tipoCambio;
+        return "Convertido: S/" + to_string(monto) + 
+               " -> " + pasarela->pagarUSD(montoUSD);
+    }
+};
+
+int main() {
+    PasarelaDolares pasarela;
+    AdaptadorSoles adaptador(&pasarela);
+    cout << adaptador.pagarSoles(375) << endl;
+    return 0;
+}
+\end{lstlisting}
+
+\subsubsection{Resultados de Ejecucion}
+
+\begin{verbatim}
+Convertido: S/375.000000 -> Pago: $100.000000 USD
+\end{verbatim}
+
+\subsubsection{Analisis}
+
+La implementacion demuestra como el patron Adapter permite la integracion transparente entre dos interfaces incompatibles. El \texttt{AdaptadorSoles} encapsula la logica de conversion de moneda y traduce las llamadas de la interfaz en soles a la interfaz en dolares de la pasarela. Este enfoque permite:
+
+\begin{itemize}
+    \item Reutilizar la pasarela existente sin modificarla
+    \item Centralizar la logica de conversion de moneda
+    \item Facilitar cambios futuros en el tipo de cambio
+    \item Mantener el principio de responsabilidad unica
+\end{itemize}
+
+\subsection{Ejercicio 2: Patron Decorator - Validacion de Funciones}
+
+\subsubsection{Descripcion del Problema}
+
+Se necesita anadir validacion de entrada a funciones matematicas sin modificar su implementacion original. Especificamente, se requiere validar que los numeros sean positivos antes de calcular raices cuadradas.
+
+\subsubsection{Implementacion en C++}
+
+\begin{lstlisting}[language=C++, caption=Sistema de Decorador con Validacion]
+#include <iostream>
+#include <string>
+#include <cmath>
+#include <functional>
+
+using namespace std;
+
+function<string(double)> validar_positivo(
+    function<double(double)> func, 
+    const string& nombre) {
+    return [func, nombre](double n) -> string {
+        if (n < 0) {
+            return "Error: numero negativo";
+        }
+        double resultado = func(n);
+        return nombre + " de " + to_string((int)n) + 
+               " = " + to_string(resultado);
+    };
+}
+
+double raiz_cuadrada(double n) {
+    return sqrt(n);
+}
+
+int main() {
+    auto raiz_con_validacion = 
+        validar_positivo(raiz_cuadrada, "Raiz");
+    
+    cout << raiz_con_validacion(16) << endl;
+    cout << raiz_con_validacion(-4) << endl;
+    
+    return 0;
+}
+\end{lstlisting}
+
+\subsubsection{Resultados de Ejecucion}
+
+\begin{verbatim}
+Raiz de 16 = 4.000000
+Error: numero negativo
+\end{verbatim}
+
+\subsubsection{Analisis}
+
+El patron Decorator permite anadir funcionalidad de validacion sin modificar la funcion original \texttt{raiz\_cuadrada}. La funcion decoradora \texttt{validar\_positivo} encapsula la logica de validacion y puede ser aplicada a cualquier funcion matematica que requiera numeros positivos. Ventajas:
+
+\begin{itemize}
+    \item Separacion de responsabilidades (calculo vs validacion)
+    \item Reutilizacion del decorador en multiples funciones
+    \item Flexibilidad para anadir o remover validaciones
+    \item No requiere modificar funciones existentes
+\end{itemize}
+
+\subsection{Ejercicio 3: Patron Composite - Sistema de Archivos}
+
+\subsubsection{Descripcion del Problema}
+
+Se requiere modelar una estructura jerarquica de archivos y carpetas donde las carpetas pueden contener tanto archivos como otras carpetas. El sistema debe permitir mostrar la estructura completa de manera recursiva.
+
+\subsubsection{Implementacion en C++}
+
+\begin{lstlisting}[language=C++, caption=Sistema de Archivos con Composite]
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+class Elemento {
+public:
+    virtual void mostrar(int nivel = 0) = 0;
+    virtual ~Elemento() {}
+};
+
+class Archivo : public Elemento {
+private:
+    string nombre;
+    
+public:
+    Archivo(const string& n) : nombre(n) {}
+    
+    void mostrar(int nivel = 0) override {
+        for (int i = 0; i < nivel; i++) cout << "  ";
+        cout << "- " << nombre << endl;
+    }
+};
+
+class Carpeta : public Elemento {
+private:
+    string nombre;
+    vector<Elemento*> elementos;
+    
+public:
+    Carpeta(const string& n) : nombre(n) {}
+    
+    void agregar(Elemento* e) {
+        elementos.push_back(e);
+    }
+    
+    void mostrar(int nivel = 0) override {
+        for (int i = 0; i < nivel; i++) cout << "  ";
+        cout << "/ " << nombre << "/" << endl;
+        for (auto e : elementos) {
+            e->mostrar(nivel + 1);
+        }
+    }
+};
+
+int main() {
+    Carpeta* raiz = new Carpeta("proyecto");
+    
+    Carpeta* src = new Carpeta("src");
+    src->agregar(new Archivo("main.cpp"));
+    src->agregar(new Archivo("utils.cpp"));
+    
+    Carpeta* docs = new Carpeta("docs");
+    docs->agregar(new Archivo("README.md"));
+    
+    raiz->agregar(src);
+    raiz->agregar(docs);
+    raiz->agregar(new Archivo("CMakeLists.txt"));
+    
+    raiz->mostrar();
+    
+    return 0;
+}
+\end{lstlisting}
+
+\subsubsection{Resultados de Ejecucion}
+
+\begin{verbatim}
+/ proyecto/
+  / src/
+    - main.cpp
+    - utils.cpp
+  / docs/
+    - README.md
+  - CMakeLists.txt
+\end{verbatim}
+
+\subsubsection{Analisis}
+
+El patron Composite permite tratar uniformemente objetos individuales (archivos) y composiciones (carpetas). La interfaz comun \texttt{Elemento} permite que el cliente manipule la estructura sin necesidad de distinguir entre archivos y carpetas. Caracteristicas destacables:
+
+\begin{itemize}
+    \item Estructura jerarquica natural y recursiva
+    \item Tratamiento uniforme de elementos simples y compuestos
+    \item Facilidad para agregar nuevos tipos de elementos
+    \item Operaciones recursivas simplificadas
+\end{itemize}
+
+\section{APLICACIONES EN FRAMEWORKS MODERNOS}
+
+\subsection{Patron Adapter en Frameworks}
+
+\subsubsection{Qt Framework (C++)}
+
+Qt utiliza extensivamente el patron Adapter en su sistema de senales y slots. La clase \texttt{QAbstractItemModel} actua como adaptador entre fuentes de datos arbitrarias y vistas de Qt, permitiendo visualizar cualquier fuente de datos en componentes como \texttt{QListView} o \texttt{QTableView}.
+
+\textbf{Ejemplo conceptual:}
+\begin{itemize}
+    \item \texttt{QSqlQueryModel}: Adapta consultas SQL a vistas Qt
+    \item \texttt{QFileSystemModel}: Adapta sistema de archivos a vistas de arbol
+    \item \texttt{QStringListModel}: Adapta listas de strings a vistas
+\end{itemize}
+
+\subsubsection{Java Swing}
+
+Swing implementa adaptadores mediante clases como \texttt{InputStreamReader} que convierte flujos de bytes (\texttt{InputStream}) a flujos de caracteres (\texttt{Reader}), adaptando interfaces incompatibles del sistema de I/O.
+
+\subsection{Patron Decorator en Frameworks}
+
+\subsubsection{Flask (Python)}
+
+Flask utiliza decoradores extensivamente para routing y middleware. Los decoradores de Python son una implementacion natural de este patron:
+
+\begin{lstlisting}[language=Python, caption=Decoradores en Flask]
+@app.route('/login')
+@require_auth
+@log_request
+def login():
+    return render_template('login.html')
+\end{lstlisting}
+
+Cada decorador (\texttt{@route}, \texttt{@require\_auth}, \texttt{@log\_request}) anade funcionalidad adicional a la funcion base sin modificarla.
+
+\subsubsection{Java I/O Streams}
+
+El sistema de streams de Java es un ejemplo clasico de Decorator:
+
+\begin{lstlisting}[language=Java, caption=Decoradores en Java I/O]
+InputStream in = new FileInputStream("datos.txt");
+BufferedInputStream buffered = new BufferedInputStream(in);
+DataInputStream data = new DataInputStream(buffered);
+\end{lstlisting}
+
+Cada capa anade funcionalidad (buffering, lectura de tipos primitivos) al stream base.
+
+\subsection{Patron Composite en Frameworks}
+
+\subsubsection{React (JavaScript)}
+
+React implementa el patron Composite en su sistema de componentes. Cada componente puede contener otros componentes, formando arboles de componentes:
+
+\begin{lstlisting}[language=HTML, caption=Composite en React]
+<App>
+  <Header>
+    <Logo />
+    <Navigation />
+  </Header>
+  <Main>
+    <Sidebar />
+    <Content />
+  </Main>
+  <Footer />
+</App>
+\end{lstlisting}
+
+\subsubsection{Java Swing}
+
+Los componentes de Swing (\texttt{JComponent}) implementan Composite. Un \texttt{JPanel} puede contener otros \texttt{JPanel}s y componentes, todos heredando de \texttt{Component}:
+
+\begin{itemize}
+    \item \texttt{Container}: Composite que puede contener componentes
+    \item \texttt{JPanel}, \texttt{JFrame}: Composites especificos
+    \item \texttt{JButton}, \texttt{JLabel}: Componentes hoja (Leaf)
+\end{itemize}
+
+\subsection{Tabla Comparativa de Aplicaciones}
+
+\begin{table}[H]
+\centering
+\caption{Aplicaciones de Patrones Estructurales en Frameworks}
+\begin{tabular}{|p{2.5cm}|p{3.5cm}|p{7cm}|}
+\hline
+\textbf{Patron} & \textbf{Framework} & \textbf{Aplicacion} \\
+\hline
+\multirow{3}{*}{Adapter} 
+& Qt & QAbstractItemModel adapta datos a vistas \\
+& Java & InputStreamReader adapta bytes a caracteres \\
+& Spring & JdbcTemplate adapta JDBC a interfaz simplificada \\
+\hline
+\multirow{3}{*}{Decorator} 
+& Flask & Decoradores para routing y autenticacion \\
+& Java I/O & BufferedInputStream, DataInputStream \\
+& Spring & @Transactional, @Cacheable \\
+\hline
+\multirow{3}{*}{Composite} 
+& React & Arbol de componentes JSX \\
+& Swing & Jerarquia de JComponent \\
+& Qt & Sistema de QObject parent-child \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{VENTAJAS Y DESVENTAJAS}
+
+\subsection{Patron Adapter}
+
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Permite reutilizar codigo existente
+    \item Desacopla cliente de implementacion adaptada
+    \item Facilita integracion con bibliotecas de terceros
+    \item Cumple principio Open/Closed
+\end{itemize}
+
+\textbf{Desventajas:}
+\begin{itemize}
+    \item Incrementa complejidad del codigo
+    \item Puede afectar rendimiento por capa adicional
+    \item Requiere mantenimiento adicional
+\end{itemize}
+
+\subsection{Patron Decorator}
+
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Mayor flexibilidad que herencia estatica
+    \item Permite combinaciones dinamicas de comportamientos
+    \item Cumple principio de responsabilidad unica
+    \item Facilita testing de componentes individuales
+\end{itemize}
+
+\textbf{Desventajas:}
+\begin{itemize}
+    \item Muchos objetos pequenos pueden dificultar debugging
+    \item Configuracion inicial puede ser compleja
+    \item Orden de decoradores puede ser importante
+\end{itemize}
+
+\subsection{Patron Composite}
+
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Simplifica codigo cliente
+    \item Facilita agregar nuevos tipos de componentes
+    \item Estructura jerarquica natural
+    \item Operaciones recursivas simplificadas
+\end{itemize}
+
+\textbf{Desventajas:}
+\begin{itemize}
+    \item Puede hacer diseno demasiado general
+    \item Dificil restringir tipos de componentes
+    \item Sobrecarga en jerarquias profundas
+\end{itemize}
+
+\section{CONCLUSIONES}
+
+\begin{enumerate}
+    \item Los patrones estructurales proporcionan soluciones probadas para organizar clases y objetos, cada uno abordando problemas especificos de composicion y estructura.
+    
+    \item El patron Adapter demostro ser efectivo para integrar interfaces incompatibles, como se evidencio en el sistema de conversion de pagos entre monedas.
+    
+    \item El patron Decorator permitio anadir funcionalidad de validacion sin modificar funciones existentes, manteniendo el principio Open/Closed.
+    
+    \item El patron Composite facilito la modelacion de estructuras jerarquicas donde objetos simples y compuestos se tratan uniformemente.
+    
+    \item Los tres patrones tienen aplicaciones extensas en frameworks modernos, demostrando su relevancia y utilidad en desarrollo de software real.
+    
+    \item La implementacion en C++ de estos patrones mostro la importancia de interfaces bien definidas y el uso apropiado de polimorfismo.
+    
+    \item La seleccion del patron apropiado depende del problema especifico: Adapter para compatibilidad, Decorator para extension dinamica, y Composite para jerarquias.
+\end{enumerate}
+
+\section{RECOMENDACIONES}
+
+\begin{enumerate}
+    \item Estudiar el problema cuidadosamente antes de aplicar un patron estructural, asegurando que sea la solucion apropiada.
+    
+    \item Documentar claramente las responsabilidades de cada clase en la implementacion del patron.
+    
+    \item Considerar el equilibrio entre flexibilidad y complejidad al aplicar estos patrones.
+    
+    \item Utilizar diagramas UML para visualizar la estructura antes de implementar.
+    
+    \item Implementar tests unitarios para cada componente del patron.
+    
+    \item Explorar las implementaciones de estos patrones en frameworks populares para comprender casos de uso reales.
+\end{enumerate}
+
+\section{REFERENCIAS}
+
+\begin{enumerate}
+    \item Gamma, E., Helm, R., Johnson, R., \& Vlissides, J. (1994). \textit{Design Patterns: Elements of Reusable Object-Oriented Software}. Addison-Wesley.
+    
+    \item Freeman, E., \& Freeman, E. (2004). \textit{Head First Design Patterns}. O'Reilly Media.
+    
+    \item Martin, R. C. (2002). \textit{Agile Software Development: Principles, Patterns, and Practices}. Prentice Hall.
+    
+    \item Bloch, J. (2008). \textit{Effective Java} (2nd ed.). Addison-Wesley.
+    
+    \item Meyers, S. (2005). \textit{Effective C++: 55 Specific Ways to Improve Your Programs and Designs} (3rd ed.). Addison-Wesley.
+\end{enumerate}
+
+\end{document}

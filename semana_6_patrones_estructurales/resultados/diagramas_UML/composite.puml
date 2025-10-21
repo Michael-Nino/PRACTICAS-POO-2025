@@ -1,0 +1,281 @@
+@startuml composite_uml
+
+title Patron Composite - Diagrama de Clases Detallado
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor<<Component>> LightBlue
+    BackgroundColor<<Leaf>> LightYellow
+    BackgroundColor<<Composite>> LightGreen
+    BackgroundColor<<Client>> Pink
+}
+
+abstract class ElementoSistemaArchivos <<Component>> {
+    # nombre : string
+    # ruta : string
+    # permisos : int
+    # fechaCreacion : DateTime
+    # fechaModificacion : DateTime
+    # propietario : string
+    --
+    + ElementoSistemaArchivos(nombre: string)
+    {abstract} + mostrar(nivel: int) : void
+    {abstract} + calcularTamano() : long
+    {abstract} + buscar(nombre: string) : ElementoSistemaArchivos*
+    {abstract} + obtenerRuta() : string
+    + cambiarPermisos(permisos: int) : void
+    + obtenerInfo() : InfoElemento
+    # formatearIndentacion(nivel: int) : string
+}
+
+class Archivo <<Leaf>> {
+    - contenido : string
+    - tamanoBytes : long
+    - extension : string
+    - tipo : TipoArchivo
+    - checksum : string
+    --
+    + Archivo(nombre: string, tamano: long)
+    + mostrar(nivel: int) : void
+    + calcularTamano() : long
+    + buscar(nombre: string) : ElementoSistemaArchivos*
+    + obtenerRuta() : string
+    + leer() : string
+    + escribir(contenido: string) : void
+    + obtenerExtension() : string
+    - calcularChecksum() : string
+    - determinarTipo() : TipoArchivo
+}
+
+class Carpeta <<Composite>> {
+    - elementos : vector<ElementoSistemaArchivos*>
+    - maxElementos : int
+    - esOculta : bool
+    - esRaiz : bool
+    --
+    + Carpeta(nombre: string)
+    + mostrar(nivel: int) : void
+    + calcularTamano() : long
+    + buscar(nombre: string) : ElementoSistemaArchivos*
+    + obtenerRuta() : string
+    --
+    + agregar(elemento: ElementoSistemaArchivos*) : bool
+    + eliminar(nombre: string) : bool
+    + obtenerElemento(indice: int) : ElementoSistemaArchivos*
+    + obtenerElementos() : vector<ElementoSistemaArchivos*>
+    + contarElementos() : int
+    + contarArchivos() : int
+    + contarCarpetas() : int
+    + estaVacia() : bool
+    + limpiar() : void
+    - validarCapacidad() : bool
+    - ordenarElementos() : void
+}
+
+class EnlaceSimbolico <<Leaf>> {
+    - destino : ElementoSistemaArchivos*
+    - rutaDestino : string
+    - esValido : bool
+    --
+    + EnlaceSimbolico(nombre: string, destino: string)
+    + mostrar(nivel: int) : void
+    + calcularTamano() : long
+    + buscar(nombre: string) : ElementoSistemaArchivos*
+    + obtenerRuta() : string
+    + obtenerDestino() : ElementoSistemaArchivos*
+    + actualizarDestino(nuevo: string) : void
+    - verificarValidez() : bool
+}
+
+class ArchivoComprimido <<Composite>> {
+    - elementos : vector<ElementoSistemaArchivos*>
+    - tamanoOriginal : long
+    - tamanoComprimido : long
+    - algoritmo : string
+    - ratioCompresion : double
+    --
+    + ArchivoComprimido(nombre: string, algoritmo: string)
+    + mostrar(nivel: int) : void
+    + calcularTamano() : long
+    + buscar(nombre: string) : ElementoSistemaArchivos*
+    + obtenerRuta() : string
+    + agregar(elemento: ElementoSistemaArchivos*) : bool
+    + extraer(destino: string) : bool
+    + comprimir() : void
+    + descomprimir() : void
+    - calcularRatioCompresion() : double
+}
+
+class ExploradorArchivos <<Client>> {
+    - raiz : Carpeta*
+    - carpetaActual : Carpeta*
+    - historial : stack<Carpeta*>
+    --
+    + ExploradorArchivos(raiz: Carpeta*)
+    + mostrarEstructura() : void
+    + navegarA(ruta: string) : bool
+    + crearArchivo(nombre: string, tamano: long) : bool
+    + crearCarpeta(nombre: string) : bool
+    + eliminarElemento(nombre: string) : bool
+    + buscarElemento(nombre: string) : ElementoSistemaArchivos*
+    + calcularTamanoTotal() : long
+    + obtenerEstadisticas() : Estadisticas
+    + irAtras() : void
+    - actualizarHistorial() : void
+}
+
+class InfoElemento {
+    + nombre : string
+    + tipo : string
+    + tamano : long
+    + ruta : string
+    + permisos : string
+    + fechas : pair<DateTime, DateTime>
+}
+
+class Estadisticas {
+    + totalArchivos : int
+    + totalCarpetas : int
+    + tamanoTotal : long
+    + archivoMasGrande : string
+    + carpetaMasProfunda : int
+}
+
+enum TipoArchivo {
+    TEXTO
+    IMAGEN
+    VIDEO
+    AUDIO
+    EJECUTABLE
+    DOCUMENTO
+    OTRO
+}
+
+ElementoSistemaArchivos <|-- Archivo
+ElementoSistemaArchivos <|-- Carpeta
+ElementoSistemaArchivos <|-- EnlaceSimbolico
+ElementoSistemaArchivos <|-- ArchivoComprimido
+
+Carpeta o--> ElementoSistemaArchivos : contiene
+ArchivoComprimido o--> ElementoSistemaArchivos : contiene
+EnlaceSimbolico ..> ElementoSistemaArchivos : referencia
+ExploradorArchivos o--> Carpeta : navega
+ExploradorArchivos ..> ElementoSistemaArchivos : manipula
+Archivo ..> TipoArchivo : usa
+ElementoSistemaArchivos ..> InfoElemento : retorna
+ExploradorArchivos ..> Estadisticas : genera
+
+note right of ElementoSistemaArchivos
+  Componente abstracto que define
+  la interfaz comun para:
+  - Archivos (hojas)
+  - Carpetas (composites)
+  - Enlaces simbolicos
+  - Archivos comprimidos
+  
+  Permite tratar uniformemente
+  elementos simples y compuestos
+end note
+
+note left of Archivo
+  Componente hoja (Leaf):
+  - No tiene hijos
+  - Implementa operaciones base
+  - Representa elemento simple
+  - Almacena contenido real
+  
+  Operaciones como agregar()
+  no tienen sentido aqui
+end note
+
+note bottom of Carpeta
+  Componente compuesto (Composite):
+  - Puede contener hijos
+  - Delega operaciones a hijos
+  - Implementa gestion de coleccion
+  
+  Operaciones recursivas:
+  - mostrar() muestra arbol completo
+  - calcularTamano() suma todos los hijos
+  - buscar() busca en toda la jerarquia
+end note
+
+note top of ArchivoComprimido
+  Composite especial:
+  - Contiene elementos comprimidos
+  - Actua como carpeta virtual
+  - Puede extraer contenido
+  
+  Ejemplos: .zip, .tar.gz, .rar
+end note
+
+note bottom of EnlaceSimbolico
+  Leaf especial (acceso indirecto):
+  - Referencia a otro elemento
+  - No duplica contenido
+  - Similar a acceso directo
+  
+  Ejemplo: symlinks en Unix/Linux
+end note
+
+package "Estructura de Ejemplo" <<Cloud>> {
+  note as N1
+    Ejemplo de jerarquia:
+    
+    proyecto/ (Carpeta)
+    |
+    +-- src/ (Carpeta)
+    |   +-- main.cpp (Archivo: 2.5 KB)
+    |   +-- utils.cpp (Archivo: 1.8 KB)
+    |   +-- headers/ (Carpeta)
+    |       +-- utils.h (Archivo: 0.5 KB)
+    |
+    +-- build/ (Carpeta)
+    |   +-- app (Archivo: 45 KB)
+    |
+    +-- docs/ (Carpeta)
+    |   +-- README.md (Archivo: 3.2 KB)
+    |   +-- manual.pdf (Archivo: 1.2 MB)
+    |
+    +-- backup.zip (ArchivoComprimido: 850 KB)
+    |   +-- old_src/ (Carpeta)
+    |       +-- legacy.cpp (Archivo)
+    |
+    +-- LICENSE (Archivo: 1.1 KB)
+    +-- link_to_src (EnlaceSimbolico -> src/)
+    
+    Operacion: proyecto->mostrar()
+    Muestra toda la estructura recursivamente
+    
+    Operacion: proyecto->calcularTamano()
+    Retorna: 2.5 + 1.8 + 0.5 + 45 + 3.2 + 1228.8 + 850 + 1.1
+    = ~2132.9 KB
+  end note
+}
+
+legend right
+  Ventajas del patron Composite:
+  
+  1. Trato uniforme de objetos simples y compuestos
+  2. Facilita agregar nuevos tipos de componentes
+  3. Simplifica codigo del cliente
+  4. Estructura jerarquica natural
+  5. Operaciones recursivas elegantes
+  
+  Aplicaciones reales:
+  - Java Swing: JComponent, Container, JPanel
+  - React: Arbol de componentes JSX
+  - Qt: QObject parent-child hierarchy
+  - DOM HTML: Nodos y elementos
+  - Sistemas de archivos
+  - Organizaciones empresariales
+  - Menus y submenus
+  
+  Casos de uso ideales:
+  - Estructuras de arbol
+  - Jerarquias parte-todo
+  - Operaciones uniformes en colecciones
+  - Recursion natural
+endlegend
+
+@enduml

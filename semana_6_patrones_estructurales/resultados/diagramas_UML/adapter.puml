@@ -1,0 +1,167 @@
+@startuml adapter_uml
+
+title Patron Adapter - Diagrama de Clases Detallado
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor<<Target>> LightBlue
+    BackgroundColor<<Adapter>> LightGreen
+    BackgroundColor<<Adaptee>> LightYellow
+    BackgroundColor<<Client>> Pink
+}
+
+interface ProcesadorPagos <<Target>> {
+    + procesarPago(monto: double, moneda: string) : ResultadoPago
+    + verificarSaldo(cuenta: string) : double
+    + generarComprobante() : Comprobante
+}
+
+class PasarelaDolares <<Adaptee>> {
+    - apiKey : string
+    - endpoint : string
+    - timeout : int
+    --
+    + PasarelaDolares(apiKey: string)
+    + pagarUSD(monto: double) : string
+    + consultarSaldoUSD(accountId: string) : double
+    + generarReceipt() : Receipt
+    - conectarAPI() : bool
+    - validarTransaccion(monto: double) : bool
+}
+
+class AdaptadorSoles <<Adapter>> {
+    - pasarela : PasarelaDolares*
+    - tipoCambio : double
+    - ultimaActualizacion : DateTime
+    - comision : double
+    --
+    + AdaptadorSoles(pasarela: PasarelaDolares*)
+    + procesarPago(monto: double, moneda: string) : ResultadoPago
+    + verificarSaldo(cuenta: string) : double
+    + generarComprobante() : Comprobante
+    --
+    - convertirSolesADolares(monto: double) : double
+    - convertirDolaresASoles(monto: double) : double
+    - actualizarTipoCambio() : void
+    - aplicarComision(monto: double) : double
+    - traducirReceipt(receipt: Receipt) : Comprobante
+}
+
+class SistemaPagosLocal <<Client>> {
+    - procesador : ProcesadorPagos*
+    - historialPagos : vector<Transaccion>
+    - cuentasActivas : map<string, Cuenta>
+    --
+    + SistemaPagosLocal(procesador: ProcesadorPagos*)
+    + realizarPagoEnSoles(monto: double, destino: string) : bool
+    + consultarHistorial() : vector<Transaccion>
+    + verificarDisponibilidad(cuenta: string) : bool
+    - registrarTransaccion(transaccion: Transaccion) : void
+    - notificarUsuario(mensaje: string) : void
+}
+
+class ResultadoPago {
+    + exito : bool
+    + transaccionId : string
+    + mensaje : string
+    + timestamp : DateTime
+    + montoOriginal : double
+    + montoConvertido : double
+}
+
+class Comprobante {
+    + numero : string
+    + fecha : DateTime
+    + monto : double
+    + moneda : string
+    + estado : string
+    + detalle : string
+}
+
+class Receipt {
+    + receiptNumber : string
+    + date : DateTime
+    + amountUSD : double
+    + status : string
+}
+
+ProcesadorPagos <|.. AdaptadorSoles : <<implements>>
+AdaptadorSoles o--> PasarelaDolares : usa
+SistemaPagosLocal o--> ProcesadorPagos : usa
+AdaptadorSoles ..> ResultadoPago : <<crea>>
+AdaptadorSoles ..> Comprobante : <<crea>>
+PasarelaDolares ..> Receipt : <<crea>>
+
+note right of AdaptadorSoles
+  El adaptador convierte entre:
+  - Soles (PEN) <-> Dolares (USD)
+  - Interfaz local <-> API internacional
+  - Comprobante <-> Receipt
+  
+  Responsabilidades adicionales:
+  - Gestion de tipo de cambio
+  - Aplicacion de comisiones
+  - Traduccion de respuestas
+end note
+
+note left of PasarelaDolares
+  Sistema legacy que:
+  - Solo opera en USD
+  - Tiene su propia API
+  - No puede modificarse
+  - Usada por multiples sistemas
+end note
+
+note bottom of SistemaPagosLocal
+  Cliente que:
+  - Opera solo en soles (PEN)
+  - No conoce PasarelaDolares
+  - Usa interfaz estandar
+  - Requiere comprobantes locales
+end note
+
+note top of ProcesadorPagos
+  Interfaz objetivo que define
+  el contrato esperado por
+  el sistema local
+end note
+
+package "Casos de Uso" <<Cloud>> {
+  note as N1
+    Ejemplo de uso:
+    
+    PasarelaDolares* pasarela = 
+        new PasarelaDolares("API_KEY_123");
+    
+    AdaptadorSoles* adaptador = 
+        new AdaptadorSoles(pasarela);
+    
+    SistemaPagosLocal sistema(adaptador);
+    
+    bool exito = 
+        sistema.realizarPagoEnSoles(375.0, "destino");
+    
+    // Flujo interno:
+    // 375 PEN -> 100 USD (TC: 3.75)
+    // -> pasarela->pagarUSD(100)
+    // -> Receipt -> Comprobante
+  end note
+}
+
+legend right
+  Ventajas del patron Adapter:
+  
+  1. Reutilizacion de codigo existente
+  2. Integracion con sistemas legacy
+  3. Desacoplamiento cliente-implementacion
+  4. Flexibilidad en cambios de proveedor
+  5. Cumple principio Open/Closed
+  
+  Aplicaciones reales:
+  - Qt: QAbstractItemModel
+  - Java: InputStreamReader
+  - Spring: JdbcTemplate
+  - Android: RecyclerView.Adapter
+endlegend
+
+@enduml

@@ -1,0 +1,29 @@
+# Ignorar carpeta ejemplo latex
+ejemplo latex/
+
+# Archivos LaTeX auxiliares
+*.aux
+*.log
+*.out
+*.toc
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.bbl
+*.blg
+*.idx
+*.ind
+*.lof
+*.lot
+
+# Archivos temporales
+*~
+*.swp
+*.tmp
+
+# Archivos de compilacion
+*.o
+*.exe
+*.class
+__pycache__/
+*.pyc
