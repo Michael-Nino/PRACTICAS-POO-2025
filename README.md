@@ -177,16 +177,4 @@ Este es un proyecto académico desarrollado por los estudiantes mencionados como
 
 ---
 
-## 📄 Licencia
-
-Este proyecto es de uso académico para la Universidad Nacional del Altiplano - UNAP.
-
----
-
-## 📞 Contacto
-
-Para consultas sobre el proyecto, contactar a través de los canales oficiales de la universidad.
-
----
-
 **Universidad Nacional del Altiplano - Puno, Perú - 2025**
