@@ -1,0 +1,285 @@
+@startuml builder_uml
+
+!define PRODUCT_COLOR #E8EAF6
+!define BUILDER_COLOR #C5E1A5
+!define DIRECTOR_COLOR #FFCCBC
+!define CLIENT_COLOR #E3F2FD
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam classBorderThickness 2
+skinparam linetype ortho
+
+title Patron Builder - Sistema de Construccion de Computadoras\n<size:12><i>Construccion paso a paso de objetos complejos</i></size>
+
+package "Producto" <<Rectangle>> {
+    
+    class Computadora <<Product>> PRODUCT_COLOR {
+        ' Componentes de Hardware
+        - cpu : string
+        - ram : int
+        - almacenamiento : int
+        - tipoAlmacenamiento : string
+        - gpu : string
+        - placaMadre : string
+        - fuentePoder : int
+        
+        ' Componentes de Software
+        - sistemaOperativo : string
+        - programasInstalados : vector<string>
+        
+        ' Caracteristicas adicionales
+        - gabinete : string
+        - refrigeracion : string
+        - iluminacionRGB : bool
+        - wifi : bool
+        - bluetooth : bool
+        
+        ' Informacion del sistema
+        - precio : double
+        - garantia : int
+        - fabricante : string
+        
+        .. Constructor ..
+        + Computadora()
+        
+        .. Setters (usados por Builder) ..
+        + setCPU(cpu: string) : void
+        + setRAM(ram: int) : void
+        + setAlmacenamiento(almac: int, tipo: string) : void
+        + setGPU(gpu: string) : void
+        + setPlacaMadre(placa: string) : void
+        + setFuentePoder(watts: int) : void
+        + setSistemaOperativo(so: string) : void
+        + setGabinete(gabinete: string) : void
+        + setRefrigeracion(tipo: string) : void
+        + setIluminacionRGB(rgb: bool) : void
+        + setConectividad(wifi: bool, bt: bool) : void
+        + agregarPrograma(programa: string) : void
+        
+        .. Metodos Publicos ..
+        + mostrar() : void
+        + obtenerEspecificaciones() : string
+        + calcularPrecio() : double
+        + validarCompatibilidad() : bool
+        + obtenerRendimiento() : int
+        + esParaGaming() : bool
+    }
+    
+    note top of Computadora
+        <b>PRODUCTO COMPLEJO</b>
+        
+        Caracteristicas:
+        • Multiples componentes opcionales
+        • Construccion paso a paso
+        • Validacion de compatibilidad
+        • Calculo automatico de precio
+    end note
+}
+
+package "Builder" <<Rectangle>> {
+    
+    abstract class BuilderInterface <<interface>> {
+        {abstract} + reset() : void
+        {abstract} + setCPU(cpu: string) : BuilderInterface&
+        {abstract} + setRAM(ram: int) : BuilderInterface&
+        {abstract} + build() : Computadora*
+    }
+    
+    class ComputadoraBuilder <<ConcreteBuilder>> BUILDER_COLOR {
+        - computadora : Computadora*
+        - configuracionActual : string
+        - pasoActual : int
+        
+        .. Constructor y Destructor ..
+        + ComputadoraBuilder()
+        + ~ComputadoraBuilder()
+        
+        .. Metodo de Reinicio ..
+        + reset() : void
+        
+        .. Metodos de Construccion (Fluent Interface) ..
+        + setCPU(cpu: string) : ComputadoraBuilder&
+        + setRAM(ram: int) : ComputadoraBuilder&
+        + setAlmacenamiento(gb: int, tipo: string) : ComputadoraBuilder&
+        + setGPU(gpu: string) : ComputadoraBuilder&
+        + setPlacaMadre(placa: string) : ComputadoraBuilder&
+        + setFuentePoder(watts: int) : ComputadoraBuilder&
+        + setSistemaOperativo(so: string) : ComputadoraBuilder&
+        + setGabinete(gabinete: string) : ComputadoraBuilder&
+        + setRefrigeracion(tipo: string) : ComputadoraBuilder&
+        + setIluminacionRGB(activar: bool) : ComputadoraBuilder&
+        + setWiFi(activar: bool) : ComputadoraBuilder&
+        + setBluetooth(activar: bool) : ComputadoraBuilder&
+        + agregarPrograma(programa: string) : ComputadoraBuilder&
+        
+        .. Metodos de Configuracion Rapida ..
+        + configuracionBasica() : ComputadoraBuilder&
+        + configuracionMedia() : ComputadoraBuilder&
+        + configuracionAlta() : ComputadoraBuilder&
+        
+        .. Metodo Final ..
+        + build() : Computadora*
+        
+        .. Metodos de Validacion ..
+        - validarComponentes() : bool
+        - validarCompatibilidadRAM() : bool
+        - calcularPotenciaRequerida() : int
+    }
+    
+    BuilderInterface <|.. ComputadoraBuilder
+    
+    note right of ComputadoraBuilder
+        <b>FLUENT INTERFACE</b>
+        
+        Permite encadenar llamadas:
+        builder.setCPU("Intel i7")
+               .setRAM(16)
+               .setGPU("RTX 3060")
+               .build();
+        
+        Cada metodo retorna *this
+    end note
+}
+
+package "Director" <<Rectangle>> {
+    
+    class Director <<Director>> DIRECTOR_COLOR {
+        - builder : ComputadoraBuilder*
+        
+        + Director()
+        + setBuilder(builder: ComputadoraBuilder*) : void
+        
+        .. Recetas Predefinidas ..
+        + construirComputadoraGaming() : Computadora*
+        + construirComputadoraOficina() : Computadora*
+        + construirEstacionTrabajo() : Computadora*
+        + construirServidor() : Computadora*
+        + construirLaptopEstudiante() : Computadora*
+        + construirPCMinimalista() : Computadora*
+        
+        .. Construcciones Especializadas ..
+        + construirParaEdicionVideo() : Computadora*
+        + construirParaDesarrollo() : Computadora*
+        + construirParaDisenoGrafico() : Computadora*
+        + construirParaInteligenciaArtificial() : Computadora*
+        
+        - aplicarConfiguracionBase(tipo: string) : void
+    }
+    
+    Director o--> ComputadoraBuilder : usa
+    
+    note bottom of Director
+        <b>DIRECTOR (OPCIONAL)</b>
+        
+        Ventajas:
+        • Encapsula recetas comunes
+        • Simplifica construccion
+        • Reutiliza configuraciones
+        • Garantiza consistencia
+        
+        No es obligatorio,
+        cliente puede usar
+        Builder directamente
+    end note
+}
+
+package "Cliente" <<Rectangle>> {
+    
+    class TiendaComputadoras CLIENT_COLOR {
+        - inventario : vector<Computadora*>
+        - director : Director*
+        - ventasRealizadas : int
+        
+        + TiendaComputadoras()
+        + ~TiendaComputadoras()
+        + venderComputadoraPersonalizada() : void
+        + venderComputadoraPredefinida(tipo: string) : void
+        + mostrarCatalogo() : void
+        + agregarAlInventario(pc: Computadora*) : void
+        - procesarVenta(pc: Computadora*) : void
+    }
+    
+    class Cliente CLIENT_COLOR {
+        - presupuesto : double
+        - necesidades : vector<string>
+        
+        + Cliente(presupuesto: double)
+        + consultarOpciones() : void
+        + realizarPedido() : void
+        + personalizarComputadora() : Computadora*
+    }
+}
+
+' Relaciones principales
+ComputadoraBuilder ..> Computadora : <<construye>>
+Director ..> Computadora : <<retorna>>
+TiendaComputadoras --> Director : usa
+TiendaComputadoras ..> ComputadoraBuilder : <<crea>>
+Cliente ..> ComputadoraBuilder : <<usa directamente>>
+Cliente ..> TiendaComputadoras : compra en
+
+note as N1
+    <b>Ejemplo 1: Uso Directo del Builder (Sin Director)</b>
+    
+    ComputadoraBuilder builder;
+    Computadora* pcGaming = builder
+        .setCPU("AMD Ryzen 9 5900X")
+        .setRAM(32)
+        .setAlmacenamiento(1000, "NVMe SSD")
+        .setGPU("NVIDIA RTX 4070")
+        .setPlacaMadre("ASUS ROG Strix")
+        .setFuentePoder(750)
+        .setSistemaOperativo("Windows 11 Pro")
+        .setIluminacionRGB(true)
+        .setRefrigeracion("Liquida")
+        .build();
+end note
+
+note as N2
+    <b>Ejemplo 2: Uso con Director (Recetas Predefinidas)</b>
+    
+    Director director;
+    ComputadoraBuilder builder;
+    director.setBuilder(&builder);
+    
+    Computadora* pcOficina = director.construirComputadoraOficina();
+    Computadora* pcGaming = director.construirComputadoraGaming();
+    Computadora* workstation = director.construirEstacionTrabajo();
+    
+    <i>El director encapsula la logica de construccion</i>
+end note
+
+N1 .. ComputadoraBuilder
+N2 .. Director
+
+legend right
+    <b>Patron Builder</b>
+    
+    <b>Proposito:</b>
+    Separar la construccion de un objeto complejo
+    de su representacion, permitiendo crear
+    diferentes representaciones con el mismo proceso.
+    
+    <b>Cuando Usar:</b>
+    • Objeto tiene muchos parametros opcionales
+    • Evitar constructor con muchos parametros
+    • Proceso de construccion en varios pasos
+    • Diferentes representaciones del mismo objeto
+    • Construccion compleja con validaciones
+    
+    <b>Ventajas:</b>
+    • Constructor limpio (evita telescoping)
+    • Inmutabilidad del producto final
+    • Control fino sobre construccion
+    • Reutilizacion de codigo de construccion
+    • Validacion durante construccion
+    
+    <b>Componentes:</b>
+    1. Product (Computadora) - Objeto complejo
+    2. Builder (ComputadoraBuilder) - Construye paso a paso
+    3. Director (opcional) - Encapsula recetas
+    4. Cliente - Usa builder o director
+endlegend
+
+@enduml

@@ -1,0 +1,208 @@
+@startuml factory_uml
+
+!define PRODUCT_COLOR #FFF3E0
+!define FACTORY_COLOR #E1BEE7
+!define CLIENT_COLOR #E3F2FD
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam classBorderThickness 2
+skinparam linetype ortho
+
+title Patron Factory Method - Sistema de Logistica de Transporte\n<size:12><i>Creacion de objetos mediante interfaz comun</i></size>
+
+package "Productos (Transportes)" <<Rectangle>> {
+    
+    abstract class Transporte <<interface>> PRODUCT_COLOR {
+        {abstract} + entregar() : void
+        {abstract} + calcularCosto(distancia: double) : double
+        {abstract} + obtenerCapacidad() : int
+        {abstract} + obtenerVelocidadPromedio() : double
+        {abstract} + obtenerTipo() : string
+        + mostrarInfo() : void
+    }
+    
+    class Camion PRODUCT_COLOR {
+        - capacidadToneladas : int
+        - numeroPuertas : int
+        - tipoMotor : string
+        - consumoCombustible : double
+        
+        + Camion()
+        + Camion(capacidad: int)
+        + entregar() : void
+        + calcularCosto(distancia: double) : double
+        + obtenerCapacidad() : int
+        + obtenerVelocidadPromedio() : double
+        + obtenerTipo() : string
+        - calcularCostoCombustible() : double
+    }
+    
+    class Barco PRODUCT_COLOR {
+        - capacidadContenedores : int
+        - tipoBarco : string
+        - velocidadNudos : double
+        - tripulacion : int
+        
+        + Barco()
+        + Barco(capacidad: int)
+        + entregar() : void
+        + calcularCosto(distancia: double) : double
+        + obtenerCapacidad() : int
+        + obtenerVelocidadPromedio() : double
+        + obtenerTipo() : string
+        - calcularTarifaPuerto() : double
+    }
+    
+    class Avion PRODUCT_COLOR {
+        - capacidadKg : int
+        - modeloAvion : string
+        - altitudMaxima : int
+        - autonomiaKm : double
+        
+        + Avion()
+        + Avion(capacidad: int)
+        + entregar() : void
+        + calcularCosto(distancia: double) : double
+        + obtenerCapacidad() : int
+        + obtenerVelocidadPromedio() : double
+        + obtenerTipo() : string
+        - calcularCostoCombustible() : double
+    }
+    
+    class Dron PRODUCT_COLOR {
+        - pesoMaximo : int
+        - autonomiaBateria : double
+        - alturaVuelo : int
+        
+        + Dron()
+        + entregar() : void
+        + calcularCosto(distancia: double) : double
+        + obtenerCapacidad() : int
+        + obtenerVelocidadPromedio() : double
+        + obtenerTipo() : string
+    }
+    
+    Transporte <|-- Camion
+    Transporte <|-- Barco
+    Transporte <|-- Avion
+    Transporte <|-- Dron
+}
+
+package "Fabrica" <<Rectangle>> {
+    
+    class TransporteFactory <<Factory>> FACTORY_COLOR {
+        - {static} transportesCreados : int
+        - {static} registro : map<string, int>
+        
+        .. Factory Methods ..
+        + {static} crear(tipo: string) : Transporte*
+        + {static} crearPorDistancia(distancia: double) : Transporte*
+        + {static} crearPorCarga(pesoKg: int) : Transporte*
+        + {static} crearOptimo(distancia: double, peso: int, urgencia: bool) : Transporte*
+        
+        .. Metodos de Utilidad ..
+        + {static} tiposDisponibles() : vector<string>
+        + {static} obtenerEstadisticas() : map<string, int>
+        + {static} validarTipo(tipo: string) : bool
+        
+        .. Metodos Privados ..
+        - {static} registrarCreacion(tipo: string) : void
+        - {static} normalizarTipo(tipo: string) : string
+    }
+    
+    note top of TransporteFactory
+        <b>FACTORY METHOD</b>
+        
+        Ventajas:
+        • Encapsula creacion de objetos
+        • Cliente desacoplado de clases concretas
+        • Facil agregar nuevos tipos
+        • Logica de seleccion centralizada
+        • Registro de instancias creadas
+    end note
+}
+
+package "Cliente" <<Rectangle>> {
+    
+    class SistemaLogistica CLIENT_COLOR {
+        - pedidos : vector<Pedido>
+        - flota : vector<Transporte*>
+        
+        + agregarPedido(pedido: Pedido) : void
+        + procesarPedidos() : void
+        + asignarTransporte(pedido: Pedido) : void
+        + calcularCostoTotal() : double
+        - optimizarRutas() : void
+    }
+    
+    class Pedido CLIENT_COLOR {
+        - id : string
+        - destino : string
+        - distancia : double
+        - peso : int
+        - urgente : bool
+        - transporte : Transporte*
+        
+        + Pedido(id: string, destino: string)
+        + asignarTransporte(t: Transporte*) : void
+        + calcularCosto() : double
+        + obtenerEstado() : string
+    }
+}
+
+' Relaciones principales
+TransporteFactory ..> Transporte : <<crea>>
+TransporteFactory ..> Camion : <<instancia>>
+TransporteFactory ..> Barco : <<instancia>>
+TransporteFactory ..> Avion : <<instancia>>
+TransporteFactory ..> Dron : <<instancia>>
+
+SistemaLogistica ..> TransporteFactory : <<solicita creacion>>
+SistemaLogistica o-- Pedido : contiene
+Pedido --> Transporte : asignado a
+
+note as N1
+    <b>Ejemplo de Uso:</b>
+    
+    <i>// Creacion simple</i>
+    Transporte* t1 = TransporteFactory::crear("camion");
+    
+    <i>// Creacion inteligente por distancia</i>
+    Transporte* t2 = TransporteFactory::crearPorDistancia(5000);
+    
+    <i>// Creacion optima considerando multiples factores</i>
+    Transporte* t3 = TransporteFactory::crearOptimo(
+        distancia: 2000,
+        peso: 500,
+        urgencia: true
+    );
+    
+    <i>// El cliente no necesita conocer clases concretas</i>
+    t1->entregar();
+end note
+
+N1 .. SistemaLogistica
+
+legend right
+    <b>Patron Factory Method</b>
+    
+    <b>Proposito:</b>
+    Define una interfaz para crear objetos,
+    pero deja que las subclases decidan
+    que clase instanciar.
+    
+    <b>Cuando Usar:</b>
+    • Clase no puede anticipar tipo de objetos
+    • Quieres localizar logica de creacion
+    • Delegas responsabilidad a subclases
+    • Necesitas desacoplar creacion de uso
+    
+    <b>Componentes:</b>
+    1. Producto (Transporte) - Interfaz comun
+    2. Productos Concretos (Camion, Barco, etc)
+    3. Creator (TransporteFactory)
+    4. Cliente (SistemaLogistica)
+endlegend
+
+@enduml

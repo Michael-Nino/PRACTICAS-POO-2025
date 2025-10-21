@@ -1,0 +1,132 @@
+@startuml singleton_uml
+
+!define SINGLETON_COLOR #E8F5E9
+!define CLIENT_COLOR #E3F2FD
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam classBorderThickness 2
+
+title Patron Singleton - Sistema de Configuracion Global\n<size:12><i>Garantiza una unica instancia de la clase</i></size>
+
+package "Patron Singleton" <<Rectangle>> {
+    
+    class Config <<Singleton>> SINGLETON_COLOR {
+        ' Atributos estaticos
+        - {static} instancia : Config*
+        - {static} mutex : std::mutex
+        
+        ' Atributos de instancia
+        - configuracion : std::map<std::string, std::string>
+        - rutaArchivo : std::string
+        - modificado : bool
+        
+        ' Constructor y destructor privados
+        - Config()
+        - Config(const Config&) = delete
+        - ~Config()
+        
+        ' Operadores eliminados
+        - operator=(const Config&) = delete
+        
+        .. Metodos Publicos ..
+        + {static} getInstance() : Config&
+        + establecer(clave: string, valor: string) : void
+        + obtener(clave: string) : string
+        + existeClave(clave: string) : bool
+        + cargarDesdeArchivo(ruta: string) : bool
+        + guardarEnArchivo() : bool
+        + limpiar() : void
+        + obtenerTodasLasClaves() : vector<string>
+        
+        .. Metodos Privados ..
+        - validarClave(clave: string) : bool
+        - inicializarDefecto() : void
+    }
+    
+    note top of Config
+        <b>SINGLETON THREAD-SAFE</b>
+        
+        Caracteristicas:
+        • Constructor privado
+        • Copy constructor eliminado
+        • Operador asignacion eliminado
+        • Instancia estatica unica
+        • Acceso mediante getInstance()
+        • Proteccion con mutex
+    end note
+    
+    note right of Config::getInstance
+        <b>Lazy Initialization</b>
+        
+        La instancia se crea solo
+        cuando es necesaria por
+        primera vez (lazy loading)
+    end note
+}
+
+package "Cliente" <<Rectangle>> {
+    
+    class Aplicacion CLIENT_COLOR {
+        - nombre : string
+        - version : string
+        
+        + Aplicacion(nombre: string)
+        + inicializar() : void
+        + ejecutar() : void
+        + configurar() : void
+        - cargarConfiguracion() : void
+    }
+    
+    class ModuloBaseDatos CLIENT_COLOR {
+        - conexion : string
+        - puerto : int
+        
+        + conectar() : bool
+        + desconectar() : void
+        - obtenerParametros() : void
+    }
+    
+    class ServicioLogging CLIENT_COLOR {
+        - nivelLog : string
+        - rutaSalida : string
+        
+        + inicializar() : void
+        + log(mensaje: string) : void
+        - configurarNivel() : void
+    }
+}
+
+' Relaciones
+Aplicacion ..> Config : <<accede mediante>>\ngetInstance()
+ModuloBaseDatos ..> Config : <<accede mediante>>\ngetInstance()
+ServicioLogging ..> Config : <<accede mediante>>\ngetInstance()
+
+Config -left-> Config : instancia
+
+note bottom of Aplicacion
+    <b>Uso del Singleton:</b>
+    
+    Config& config = Config::getInstance();
+    config.establecer("db_host", "localhost");
+    string host = config.obtener("db_host");
+    
+    <i>Todos los clientes acceden</i>
+    <i>a la misma instancia</i>
+end note
+
+legend right
+    <b>Ventajas del Patron:</b>
+    • Control estricto de instancia unica
+    • Acceso global controlado
+    • Inicializacion perezosa (lazy)
+    • Thread-safe con mutex
+    
+    <b>Casos de Uso:</b>
+    • Configuracion global
+    • Pool de conexiones
+    • Cache de sistema
+    • Gestor de logs
+endlegend
+
+@enduml
